@@ -1,0 +1,62 @@
+name: Generate AQI Files
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'  # Every 5 minutes, including start of the hour
+  workflow_dispatch:  # Allows manual triggering
+
+jobs:
+  generate-files:
+    runs-on: ubuntu-latest
+    env:
+      TZ: Asia/Colombo  # Set timezone to Sri Lanka
+
+    steps:
+      # Checkout the repository code
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Set up Python environment
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+
+      # Clear pip cache
+      - name: Clear pip cache
+        run: pip cache purge
+
+      # Install dependencies
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip setuptools wheel
+          pip install -r requirements.txt
+
+      # Generate daily AQI data file
+      #- name: Generate AQI data files
+      #  run: |
+      #    python daily_aqi_data.py
+
+      # Generate all station and most polluted cities files
+      - name: Generate chart files
+        run: |
+          python xlsx_file_generator.py
+
+      # Generate map files
+      #- name: Generate province map files
+      #  run: |
+      #    python province_map.py
+
+      # Generate map file
+      - name: Generate all stations map file
+        run: |
+          python all_stations_map.py
+
+      # Commit generated files
+      - name: Commit generated files
+        run: |
+          git config --global user.name "DulangaDasanayake"
+          git config --global user.email "dulanganiroshan721@gmail.com"
+          git add charts/* daily_aqi_data/* province_maps/* all_stations_maps/*
+          git diff --cached --quiet || git commit -m "Add newly generated charts and maps"
+          git push https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/${{ github.repository }} HEAD:${{ github.ref }}
