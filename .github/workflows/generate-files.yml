@@ -55,8 +55,8 @@ jobs:
       # Commit generated files
       - name: Commit generated files
         run: |
-          git config --global user.name "DulangaDasanayake"
-          git config --global user.email "dulanganiroshan721@gmail.com"
+          git config --global user.name "fectscr"
+          git config --global user.email "dulangafect@gmail.com"
           git add charts/* daily_aqi_data/* province_maps/* all_stations_maps/*
           git diff --cached --quiet || git commit -m "Add newly generated charts and maps"
           git push https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/${{ github.repository }} HEAD:${{ github.ref }}
